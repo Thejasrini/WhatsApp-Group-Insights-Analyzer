@@ -4,4 +4,6 @@
 - [x] Update myproject/settings.py - add '*' to default ALLOWED_HOSTS fallback
 - [x] Verify requirements.txt has django, gunicorn, whitenoise
 - [x] Provide exact Render dashboard Build & Start commands
+- [x] Create render.yaml with corrected build/start commands and Python 3.11
+- [x] Create build.sh script for standardized builds
 
