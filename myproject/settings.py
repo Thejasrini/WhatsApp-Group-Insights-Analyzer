@@ -31,6 +31,7 @@ DEBUG = os.environ.get("DEBUG", "False") == "True"
 _default_hosts = [
     "127.0.0.1",
     "localhost",
+    "*",
     "whatsapp-text-chat-analysis-system-4q8m.onrender.com",
     "django-whatsapp-text-chat-analysis_website.onrender.com"
 ]
