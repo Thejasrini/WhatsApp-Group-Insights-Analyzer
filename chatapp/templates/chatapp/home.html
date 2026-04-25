@@ -1,0 +1,454 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome • WhatsApp Chat Analyzer</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23128C7E'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='28' fill='white'%3EW%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap');
+
+    :root {
+      --primary: #1f7a69;
+      --primary-dark: #145748;
+      --accent: #d76a34;
+      --bg: #f3f6f2;
+      --paper: #fffcf6;
+      --paper-soft: #f8f2e9;
+      --text: #1d2924;
+      --muted: #607168;
+      --border: #dce4dc;
+      --success: #107e4f;
+      --error: #c64040;
+      --shadow: 0 16px 35px rgba(25, 44, 36, 0.12);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Manrope', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 85% 8%, rgba(31, 122, 105, 0.16), transparent 24%),
+        radial-gradient(circle at 10% 18%, rgba(215, 106, 52, 0.14), transparent 28%),
+        linear-gradient(160deg, var(--bg) 0%, #e8efe7 100%);
+    }
+
+    .container { max-width: 980px; margin: 0 auto; padding: 2.3rem 1.2rem 3rem; }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 2.2rem;
+      padding: 2.2rem 1rem;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(31, 122, 105, 0.12), rgba(215, 106, 52, 0.1));
+      box-shadow: var(--shadow);
+    }
+
+    .hero h1 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2.2rem, 5.5vw, 3.2rem);
+      margin-bottom: 0.8rem;
+      color: var(--primary-dark);
+    }
+
+    .hero p { max-width: 680px; margin: 0 auto; color: var(--muted); line-height: 1.65; font-size: 1.08rem; }
+
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.25rem;
+      overflow: hidden;
+      animation: fadeIn .45s ease;
+    }
+
+    .card-header {
+      padding: 1.1rem 1.4rem;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(130deg, rgba(31, 122, 105, 0.08), rgba(215, 106, 52, 0.08));
+    }
+
+    .card-header h2 { font-size: 1.22rem; color: var(--primary-dark); display: flex; align-items: center; gap: 0.6rem; }
+    .card-body { padding: 1.35rem; }
+
+    .upload-area {
+      border: 2px dashed color-mix(in srgb, var(--primary) 38%, var(--border));
+      border-radius: 14px;
+      padding: 1.6rem;
+      text-align: center;
+      background: var(--paper-soft);
+      margin-bottom: 1rem;
+      transition: all .25s ease;
+    }
+
+    .upload-area.dragover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(31, 122, 105, 0.15);
+    }
+
+    .actions { display: flex; gap: 0.7rem; align-items: center; flex-wrap: wrap; justify-content: center; }
+
+    .file-input-wrapper { position: relative; display: inline-flex; }
+    .file-input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 0.78rem 1.2rem;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.95rem;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: linear-gradient(140deg, var(--primary), var(--primary-dark)); color: #fff; box-shadow: 0 10px 24px rgba(20, 87, 72, 0.26); }
+    .btn-secondary { background: #fff; color: var(--primary-dark); border: 1px solid var(--border); }
+    .btn-secondary:hover { box-shadow: 0 8px 18px rgba(25, 44, 36, 0.13); }
+    .btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    .files-list { border-radius: 14px; border: 1px solid var(--border); overflow: hidden; background: #fff; }
+
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 0.95rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .file-item:last-child { border-bottom: none; }
+    .file-info h4 { margin-bottom: 0.2rem; color: var(--primary-dark); }
+    .file-meta { color: var(--muted); font-size: 0.84rem; }
+
+    .delete-btn {
+      background: #ce4646;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 0.5rem 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .delete-btn:hover { background: #b73636; }
+
+    .select {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 0.8rem 0.95rem;
+      background: #fff;
+      margin-bottom: 0.9rem;
+    }
+
+    .select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(31, 122, 105, 0.15); }
+
+    .no-files { text-align: center; color: var(--muted); padding: 1.8rem; }
+
+    .status {
+      margin-top: 0.9rem;
+      padding: 0.7rem 0.9rem;
+      border-radius: 10px;
+      font-weight: 600;
+      display: none;
+    }
+
+    .status.success { background: rgba(16, 126, 79, 0.12); color: var(--success); border: 1px solid rgba(16, 126, 79, 0.25); }
+    .status.error { background: rgba(198, 64, 64, 0.11); color: var(--error); border: 1px solid rgba(198, 64, 64, 0.22); }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn .6s ease both; }
+
+    @media (max-width: 768px) {
+      .container { padding: 1rem .8rem 2rem; }
+      .actions { flex-direction: column; align-items: stretch; }
+      .btn { justify-content: center; }
+      .file-item { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero fade-in">
+      <h1>Welcome to WhatsApp Chat Analyzer</h1>
+      <p>Upload your WhatsApp exported chat file (.txt), select a group, and unlock powerful analytics and insights about your conversations.</p>
+    </div>
+
+    <div class="card fade-in">
+      <div class="card-header">
+        <h2><i class="fas fa-cloud-upload-alt"></i> Upload Chat File</h2>
+      </div>
+      <div class="card-body">
+        <div class="upload-area" id="uploadArea">
+          <i class="fas fa-file-upload" style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;"></i>
+          <p style="margin-bottom: 1rem; color: var(--text-muted);">Drop your WhatsApp .txt file here or click to browse</p>
+          <div class="actions">
+            <label class="btn btn-primary file-input-wrapper">
+              <i class="fas fa-folder-open"></i> Choose File
+              <input id="chatFile" type="file" accept=".txt" class="file-input">
+            </label>
+            <button id="uploadBtn" class="btn btn-secondary">
+              <i class="fas fa-upload"></i> Upload
+            </button>
+          </div>
+          <div id="uploadStatus" class="status"></div>
+        </div>
+        <p style="font-size: 0.875rem; color: var(--text-muted); text-align: center;">
+          <i class="fas fa-info-circle"></i> Only .txt files exported from WhatsApp are supported
+        </p>
+      </div>
+    </div>
+
+    <div class="card fade-in">
+      <div class="card-header">
+        <h2><i class="fas fa-folder"></i> Uploaded Files</h2>
+      </div>
+      <div class="card-body">
+        <div id="filesList" class="files-list">
+          <div class="no-files" id="noFiles">
+            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem; color: var(--text-muted);"></i>
+            <p>No files uploaded yet</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card fade-in">
+      <div class="card-header">
+        <h2><i class="fas fa-users"></i> Select Group</h2>
+      </div>
+      <div class="card-body">
+        <select id="groupSelect" class="select">
+          <option value="">No groups available</option>
+        </select>
+        <div class="actions">
+          <button id="proceedBtn" class="btn btn-primary" disabled>
+            <i class="fas fa-chart-line"></i> Analysis
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const uploadBtn = document.getElementById('uploadBtn');
+      const chatFile = document.getElementById('chatFile');
+      const uploadStatus = document.getElementById('uploadStatus');
+      const filesList = document.getElementById('filesList');
+      const noFiles = document.getElementById('noFiles');
+      const groupSelect = document.getElementById('groupSelect');
+      const proceedBtn = document.getElementById('proceedBtn');
+      const uploadArea = document.getElementById('uploadArea');
+
+      function csrfToken(){
+        const m = document.cookie.match(/csrftoken=([^;]+)/);
+        return m ? m[1] : '';
+      }
+
+      function showStatus(message, type) {
+        uploadStatus.textContent = message;
+        uploadStatus.className = `status ${type}`;
+        uploadStatus.style.display = 'block';
+        setTimeout(() => {
+          uploadStatus.style.display = 'none';
+        }, 5000);
+      }
+
+      // Drag and drop functionality
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+      });
+
+      uploadArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+      });
+
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          chatFile.files = files;
+          showStatus(`File "${files[0].name}" ready to upload`, 'success');
+        }
+      });
+
+      async function refreshFiles(){
+        try {
+          const res = await fetch('/api/get-uploaded-files/', {method:'POST', headers:{'X-CSRFToken': csrfToken()}});
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          const data = await res.json().catch(()=>({files:[]}));
+          const files = data.files || [];
+          filesList.innerHTML = '';
+          
+          if(!files.length){
+            filesList.appendChild(noFiles);
+            noFiles.style.display = 'block';
+          } else {
+            for (const f of files){
+              const item = document.createElement('div');
+              item.className = 'file-item';
+              item.innerHTML = `
+                <div class="file-info">
+                  <h4>${f.name}</h4>
+                  <div class="file-meta">
+                    <i class="fas fa-users"></i> ${f.group_name} • 
+                    <i class="fas fa-calendar"></i> ${new Date(f.uploaded_at).toLocaleString()}
+                  </div>
+                </div>
+                <button data-id="${f.id}" class="delete-btn">
+                  <i class="fas fa-trash"></i> Delete
+                </button>
+              `;
+              item.querySelector('.delete-btn').addEventListener('click', async (e)=>{
+                if (confirm('Are you sure you want to delete this file?')) {
+                  const id = e.currentTarget.getAttribute('data-id');
+                  try {
+                    await fetch('/api/delete-file/', {method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken': csrfToken()}, body: JSON.stringify({file_id: id})});
+                    await refreshFiles();
+                    await refreshGroups();
+                  } catch (deleteError) {
+                    console.error('Error deleting file:', deleteError);
+                    showStatus('Error deleting file. Please try again.', 'error');
+                  }
+                }
+              });
+              filesList.appendChild(item);
+            }
+          }
+        } catch (e) { 
+          console.error('Error refreshing files:', e);
+          showStatus('Error loading files. Please try again.', 'error');
+          // Ensure UI is still functional even if API call fails
+          if (filesList.children.length === 0) {
+            filesList.appendChild(noFiles);
+            noFiles.style.display = 'block';
+          }
+        }
+      }
+
+      async function refreshGroups(){
+        try {
+          const res = await fetch('/api/get-groups/');
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          const data = await res.json().catch(()=>({groups:[]}));
+          const groups = data.groups || [];
+          groupSelect.innerHTML = '';
+          
+          if(!groups.length){
+            groupSelect.disabled = true;
+            proceedBtn.disabled = true;
+            const opt = document.createElement('option');
+            opt.value = ''; opt.textContent = 'No groups available - upload a file first';
+            groupSelect.appendChild(opt);
+          } else {
+            groupSelect.disabled = false;
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = ''; defaultOpt.textContent = 'Select a group...';
+            groupSelect.appendChild(defaultOpt);
+            
+            for (const g of groups){
+              const opt = document.createElement('option');
+              opt.value = g; opt.textContent = g;
+              groupSelect.appendChild(opt);
+            }
+            
+            groupSelect.addEventListener('change', () => {
+              proceedBtn.disabled = !groupSelect.value;
+            });
+          }
+        } catch (e) { 
+          console.error('Error refreshing groups:', e);
+          showStatus('Error loading groups. Please try again.', 'error');
+          // Ensure UI is still functional even if API call fails
+          groupSelect.disabled = true;
+          proceedBtn.disabled = true;
+          const opt = document.createElement('option');
+          opt.value = ''; opt.textContent = 'Error loading groups';
+          groupSelect.appendChild(opt);
+        }
+      }
+
+      uploadBtn.addEventListener('click', async ()=>{
+        if(!chatFile.files.length){ 
+          showStatus('Please select a .txt file first', 'error'); 
+          return; 
+        }
+        
+        const file = chatFile.files[0];
+        if (!file.name.endsWith('.txt')) {
+          showStatus('Only .txt files are supported', 'error');
+          return;
+        }
+        
+        const form = new FormData();
+        form.append('file', file);
+        
+        uploadBtn.disabled = true;
+        uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+        
+        try{
+          const res = await fetch('/api/upload/', { method: 'POST', headers: {'X-CSRFToken': csrfToken()}, body: form});
+          const data = await res.json();
+          
+          if(data.success){
+            showStatus(`Successfully uploaded: ${data.group_name}`, 'success');
+            chatFile.value = '';
+            await refreshFiles();
+            await refreshGroups();
+          } else {
+            showStatus(data.error || 'Upload failed', 'error');
+          }
+        }catch(err){
+          console.error('Upload error:', err);
+          showStatus('Upload failed. Please try again.', 'error');
+        } finally {
+          uploadBtn.disabled = false;
+          uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload';
+        }
+      });
+
+      proceedBtn.addEventListener('click', ()=>{
+        const g = groupSelect.value;
+        if(!g) return;
+        window.location.href = `/react-dashboard?group=${encodeURIComponent(g)}`;
+      });
+
+      // Initialize
+      document.addEventListener('DOMContentLoaded', async function() {
+        try {
+          await refreshFiles();
+        } catch (e) {
+          console.error('Error initializing files:', e);
+        }
+        
+        try {
+          await refreshGroups();
+        } catch (e) {
+          console.error('Error initializing groups:', e);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

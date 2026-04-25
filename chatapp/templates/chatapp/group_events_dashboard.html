@@ -1,0 +1,521 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Group Events Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap');
+
+    :root {
+      --primary: #1f7a69;
+      --primary-dark: #145748;
+      --accent: #d76a34;
+      --bg: #f3f6f2;
+      --paper: #fffdf9;
+      --paper-soft: #f8f2e9;
+      --text: #1d2924;
+      --muted: #617068;
+      --border: #dbe4dc;
+      --shadow: 0 16px 35px rgba(25, 44, 36, 0.11);
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Manrope', sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 85% 10%, rgba(31, 122, 105, 0.14), transparent 25%),
+        radial-gradient(circle at 10% 22%, rgba(215, 106, 52, 0.12), transparent 30%),
+        linear-gradient(160deg, var(--bg) 0%, #e9f0e8 100%);
+      line-height: 1.6;
+    }
+
+    .header {
+      background: color-mix(in srgb, var(--paper) 88%, transparent);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+
+    .section {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin: 1rem 0;
+      padding: 1rem;
+      box-shadow: var(--shadow);
+    }
+
+    .section-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.35rem;
+      margin-bottom: 0.75rem;
+      color: var(--primary-dark);
+      border-bottom: 2px solid color-mix(in srgb, var(--primary) 40%, var(--border));
+      padding-bottom: 0.4rem;
+    }
+
+    .event-category { margin-bottom: 1rem; }
+
+    .category-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--primary-dark);
+      background: linear-gradient(130deg, rgba(31, 122, 105, 0.11), rgba(215, 106, 52, 0.1));
+      border-radius: 12px;
+      padding: 0.55rem 0.65rem;
+      border: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .event-item {
+      padding: 0.45rem 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .event-item:last-child { border-bottom: none; }
+
+    .event-bullet {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent);
+      border-radius: 50%;
+      margin-right: 10px;
+      margin-top: 8px;
+      flex-shrink: 0;
+    }
+
+    .event-content { flex-grow: 1; }
+    .event-meta { display: flex; justify-content: space-between; font-size: 0.84rem; color: var(--muted); margin-bottom: 0.15rem; }
+    .event-timestamp { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+
+    .event-details {
+      font-size: 0.86rem;
+      margin-left: 14px;
+      padding-left: 8px;
+      border-left: 2px solid var(--border);
+      color: var(--text);
+      margin-top: 0.15rem;
+    }
+
+    .count-badge {
+      background: linear-gradient(130deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 0.25rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-weight: 700; margin-bottom: 0.3rem; }
+
+    .form-control {
+      width: 100%;
+      padding: 0.6rem 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(31, 122, 105, 0.15); }
+
+    .btn {
+      background: linear-gradient(140deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 0.62rem 1rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(20, 87, 72, 0.2); }
+    .back-link { color: var(--primary-dark); text-decoration: none; font-weight: 800; }
+    .back-link:hover { text-decoration: underline; }
+    .no-events { text-align: center; color: var(--muted); font-style: italic; padding: 0.75rem; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="container">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h1>Group Events Analysis</h1>
+        <a href="/home" class="back-link">← Back to Home</a>
+      </div>
+      <p>Track member activities and admin actions in your WhatsApp groups</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Input Section -->
+    <div class="section">
+      <h2 class="section-title">Analysis Parameters</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.75rem;">
+        <div class="form-group">
+          <label class="form-label">Group</label>
+          <select id="groupSelect" class="form-control">
+            <option value="">Select a group</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Start Date</label>
+          <input type="date" id="startDate" class="form-control">
+          <div id="startDateHint" style="font-size: 0.75rem; color: #6c757d; margin-top: 0.2rem;"></div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">End Date</label>
+          <input type="date" id="endDate" class="form-control">
+          <div id="endDateHint" style="font-size: 0.75rem; color: #6c757d; margin-top: 0.2rem;"></div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">User Filter (Optional)</label>
+          <input type="text" id="userFilter" class="form-control" placeholder="Enter username">
+        </div>
+      </div>
+      
+      <div style="margin-top: 0.75rem; text-align: right;">
+        <button id="analyzeBtn" class="btn">Analyze Events</button>
+      </div>
+    </div>
+    
+    <!-- Results Section -->
+    <div id="resultsSection" style="display: none;">
+      <div class="section">
+        <h2 class="section-title">Analysis Results</h2>
+        <div id="dateRangeInfo" style="text-align: center; margin-bottom: 1rem; padding: 0.5rem; background-color: #f1f8e9; border-radius: 4px;"></div>
+        
+        <!-- Summary Counts -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+          <div style="text-align: center; padding: 1rem; background-color: #e3f2fd; border-radius: 4px;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #1976d2;" id="addedCount">0</div>
+            <div>Members Added</div>
+          </div>
+          
+          <div style="text-align: center; padding: 1rem; background-color: #fff3e0; border-radius: 4px;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #f57c00;" id="leftCount">0</div>
+            <div>Members Left</div>
+          </div>
+          
+          <div style="text-align: center; padding: 1rem; background-color: #ffebee; border-radius: 4px;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #d32f2f;" id="removedCount">0</div>
+            <div>Members Removed</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Detailed Event Lists -->
+      <div class="event-category">
+        <h3 class="category-title">
+          <span>Added Members</span>
+          <span class="count-badge" id="addedBadge">0</span>
+        </h3>
+        <div id="addedList">
+          <div class="no-events">No added events found.</div>
+        </div>
+      </div>
+      
+      <div class="event-category">
+        <h3 class="category-title">
+          <span>Members Who Left</span>
+          <span class="count-badge" id="leftBadge">0</span>
+        </h3>
+        <div id="leftList">
+          <div class="no-events">No left events found.</div>
+        </div>
+      </div>
+      
+      <div class="event-category">
+        <h3 class="category-title">
+          <span>Removed Members</span>
+          <span class="count-badge" id="removedBadge">0</span>
+        </h3>
+        <div id="removedList">
+          <div class="no-events">No removed events found.</div>
+        </div>
+      </div>
+      
+      <div class="event-category">
+        <h3 class="category-title">
+          <span>Subject Changes</span>
+          <span class="count-badge" id="subjectBadge">0</span>
+        </h3>
+        <div id="subjectList">
+          <div class="no-events">No subject change events found.</div>
+        </div>
+      </div>
+      
+      <div class="event-category">
+        <h3 class="category-title">
+          <span>Icon Changes</span>
+          <span class="count-badge" id="iconBadge">0</span>
+        </h3>
+        <div id="iconList">
+          <div class="no-events">No icon change events found.</div>
+        </div>
+      </div>
+      
+      <div class="event-category">
+        <h3 class="category-title">
+          <span>Group Creation</span>
+          <span class="count-badge" id="createdBadge">0</span>
+        </h3>
+        <div id="createdList">
+          <div class="no-events">No group creation events found.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOM utilities
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+    
+    // State variables
+    let lastPayload = null;
+    
+    // Helper functions
+    async function fetchJSON(url, body) {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      return res.json();
+    }
+    
+    function formatDate(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+    
+    // Event handlers
+    async function loadGroups() {
+      try {
+        const data = await fetchJSON('/get_groups/', {});
+        const select = $('#groupSelect');
+        select.innerHTML = '<option value="">Select a group</option>';
+        data.groups.forEach(group => {
+          const option = document.createElement('option');
+          option.value = group;
+          option.textContent = group;
+          select.appendChild(option);
+        });
+      } catch (err) {
+        console.error('Error loading groups:', err);
+      }
+    }
+    
+    async function analyzeEvents() {
+      const group = $('#groupSelect').value;
+      const startDate = $('#startDate').value;
+      const endDate = $('#endDate').value;
+      const userFilter = $('#userFilter').value;
+      
+      if (!group) {
+        alert('Please select a group');
+        return;
+      }
+      
+      const payload = {
+        group_name: group,
+        start_date: startDate,
+        end_date: endDate,
+        user: userFilter || undefined
+      };
+      
+      lastPayload = payload;
+      
+      try {
+        // Show loading state
+        $('#analyzeBtn').disabled = true;
+        $('#analyzeBtn').textContent = 'Analyzing...';
+        
+        // Fetch data
+        const analyticsData = await fetchJSON('/group_events_analytics/', payload);
+        const detailedData = await fetchJSON('/group_events/', payload);
+        
+        // Show results section
+        $('#resultsSection').style.display = 'block';
+        
+        // Update date range info
+        if (startDate && endDate) {
+          $('#dateRangeInfo').innerHTML = `
+            <strong>Analysis Period:</strong> ${startDate} to ${endDate}
+          `;
+        } else {
+          $('#dateRangeInfo').textContent = '';
+        }
+        
+        // Update counts
+        $('#addedCount').textContent = analyticsData.event_counts.added || 0;
+        $('#leftCount').textContent = analyticsData.event_counts.left || 0;
+        $('#removedCount').textContent = analyticsData.event_counts.removed || 0;
+        
+        $('#addedBadge').textContent = detailedData.added_list ? detailedData.added_list.length : 0;
+        $('#leftBadge').textContent = detailedData.left_list ? detailedData.left_list.length : 0;
+        $('#removedBadge').textContent = detailedData.removed_list ? detailedData.removed_list.length : 0;
+        $('#subjectBadge').textContent = detailedData.changed_subject_list ? detailedData.changed_subject_list.length : 0;
+        $('#iconBadge').textContent = detailedData.changed_icon_list ? detailedData.changed_icon_list.length : 0;
+        $('#createdBadge').textContent = detailedData.created_list ? detailedData.created_list.length : 0;
+        
+        // Update detailed lists
+        updateEventList('addedList', detailedData.added_list, 'added');
+        updateEventList('leftList', detailedData.left_list, 'left');
+        updateEventList('removedList', detailedData.removed_list, 'removed');
+        updateEventList('subjectList', detailedData.changed_subject_list, 'changed_subject');
+        updateEventList('iconList', detailedData.changed_icon_list, 'changed_icon');
+        updateEventList('createdList', detailedData.created_list, 'created');
+        
+        // Scroll to results
+        $('#resultsSection').scrollIntoView({ behavior: 'smooth' });
+        
+      } catch (err) {
+        console.error('Error:', err);
+        alert('Failed to analyze events: ' + (err.message || 'Unknown error'));
+      } finally {
+        // Reset loading state
+        $('#analyzeBtn').disabled = false;
+        $('#analyzeBtn').textContent = 'Analyze Events';
+      }
+    }
+    
+    function updateEventList(containerId, events, eventType) {
+      const container = $(`#${containerId}`);
+      
+      if (!events || events.length === 0) {
+        container.innerHTML = '<div class="no-events">No events found.</div>';
+        return;
+      }
+      
+      let html = '';
+      events.forEach(event => {
+        // Format events with bullet points for better readability
+        html += `
+          <div class="event-item">
+            <div class="event-bullet"></div>
+            <div class="event-content">
+              <div class="event-meta">
+                <span>
+                  ${getEventActor(event, eventType)} 
+                  ${getEventAction(eventType)} 
+                  ${getEventTarget(event, eventType)}
+                </span>
+                <span class="event-timestamp">${event.timestamp || 'Unknown time'}</span>
+              </div>
+              ${event.details ? `<div class="event-details">${event.details}</div>` : ''}
+            </div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+    
+    function getEventActor(event, eventType) {
+      switch (eventType) {
+        case 'added':
+          return `<strong>${event.actor || 'Unknown'}</strong>`;
+        case 'left':
+          return `<strong>${event.actor || 'Unknown'}</strong>`;
+        case 'removed':
+          return `<strong>${event.actor || 'Unknown'}</strong>`;
+        case 'changed_subject':
+          return `<strong>${event.actor || 'Unknown'}</strong>`;
+        case 'changed_icon':
+          return `<strong>${event.actor || 'Unknown'}</strong>`;
+        case 'created':
+          return `<strong>${event.actor || 'Unknown'}</strong>`;
+        default:
+          return `<strong>Unknown</strong>`;
+      }
+    }
+    
+    function getEventAction(eventType) {
+      switch (eventType) {
+        case 'added':
+          return 'added';
+        case 'left':
+          return 'left the group';
+        case 'removed':
+          return 'removed';
+        case 'changed_subject':
+          return 'changed subject to';
+        case 'changed_icon':
+          return 'changed group icon';
+        case 'created':
+          return 'created the group';
+        default:
+          return '';
+      }
+    }
+    
+    function getEventTarget(event, eventType) {
+      switch (eventType) {
+        case 'added':
+          return `<strong>${event.target || 'Unknown'}</strong>`;
+        case 'left':
+          return '';
+        case 'removed':
+          return `<strong>${event.target || 'Unknown'}</strong>`;
+        case 'changed_subject':
+          return `<strong>"${event.target || 'Unknown'}"</strong>`;
+        case 'changed_icon':
+          return '';
+        case 'created':
+          return '';
+        default:
+          return '';
+      }
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadGroups();
+      $('#analyzeBtn').addEventListener('click', analyzeEvents);
+      
+      // Auto-load dates when group changes
+      $('#groupSelect').addEventListener('change', async () => {
+        const group = $('#groupSelect').value;
+        if (!group) return;
+        
+        try {
+          const data = await fetchJSON('/get_group_dates/', { group });
+          if (data.start_date && data.end_date) {
+            $('#startDate').value = data.start_date.split(' ')[0]; // Extract date part
+            $('#endDate').value = data.end_date.split(' ')[0]; // Extract date part
+            $('#startDateHint').textContent = `First message: ${data.start_date}`;
+            $('#endDateHint').textContent = `Last message: ${data.end_date}`;
+          }
+        } catch (err) {
+          console.error('Error fetching group dates:', err);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
