@@ -182,7 +182,6 @@ pydantic==2.12.5
 pydantic-settings==2.9.1
 pydantic_core==2.41.5
 pydeck==0.9.1
-pygame==2.6.1
 Pygments==2.19.1
 pylint==3.3.4
 PyMuPDF==1.25.5
